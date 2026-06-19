@@ -1,0 +1,153 @@
+<?xml version='1.0'?>
+<sdf version='1.9'>
+  <model name='shixi'>
+    
+    <include>
+      <pose>-2.0 -15.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_0</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>2.0 -15.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_0</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>-2.0 -10.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_1</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>2.0 -10.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_1</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>-2.0 -5.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_2</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>2.0 -5.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_2</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>-2.0 0.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_3</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>2.0 0.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_3</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>-1.31 4.32 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_4</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>0.68 8.23 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_5</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>3.77 11.32 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_6</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>7.68 13.31 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_7</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>12.0 14.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_8</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>2.76 3.83 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_4</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>4.93 7.07 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_5</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>8.17 9.24 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_6</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>12.0 10.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_7</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>17.0 14.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_9</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>17.0 10.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_8</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>22.0 14.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_10</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>22.0 10.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_9</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+    <include>
+      <pose>27.0 14.0 0 0 0 0</pose>
+      <uri>model://blue_cone</uri>
+      <name>blue_cone_11</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+    <include>
+      <pose>27.0 10.0 0 0 0 0</pose>
+      <uri>model://yellow_cone</uri>
+      <name>yellow_cone_10</name>
+      <covariance x="0.01" y="0.01" xy="0.0"/>
+    </include>
+
+  </model>
+</sdf>

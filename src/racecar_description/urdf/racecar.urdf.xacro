@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<robot name="racecar" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- 底盘几何与质量参数 -->
+  <xacro:property name="base_len"  value="0.6"/>
+  <xacro:property name="base_wid"  value="0.4"/>
+  <xacro:property name="base_hei"  value="0.2"/>
+  <xacro:property name="base_mass" value="220.0"/>
+
+  <xacro:property name="wheel_radius" value="0.1"/>
+  <xacro:property name="wheel_width"  value="0.05"/>
+  <xacro:property name="wheel_mass"   value="10.0"/>
+  <xacro:property name="wheelbase"    value="0.6"/>
+  <xacro:property name="track_width"  value="0.4"/>
+
+  <!-- 底盘base_link -->
+  <link name="base_link">
+    <visual>
+      <geometry><box size="${base_len} ${base_wid} ${base_hei}"/></geometry>
+      <material name="grey"><color rgba="0.4 0.4 0.4 1.0"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="${base_len} ${base_wid} ${base_hei}"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="${base_mass}"/>
+      <inertia
+        ixx="${(1/12)*base_mass*(base_wid*base_wid + base_hei*base_hei)}" ixy="0" ixz="0"
+        iyy="${(1/12)*base_mass*(base_len*base_len + base_hei*base_hei)}" iyz="0"
+        izz="${(1/12)*base_mass*(base_len*base_len + base_wid*base_wid)}"/>
+    </inertial>
+  </link>
+
+  <!--后轮宏：continuous joint绕Y轴转动-->
+  <xacro:macro name="wheel" params="name x y">
+    <link name="${name}">
+      <visual>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <material name="black"><color rgba="0.1 0.1 0.1 1.0"/></material>
+      </visual>
+      <collision>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <inertial>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia
+          ixx="${(1/12)*wheel_mass*(3*wheel_radius*wheel_radius + wheel_width*wheel_width)}" ixy="0" ixz="0"
+          iyy="${(1/12)*wheel_mass*(3*wheel_radius*wheel_radius + wheel_width*wheel_width)}" iyz="0"
+          izz="${(1/2)*wheel_mass*wheel_radius*wheel_radius}"/>
+      </inertial>
+    </link>
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child  link="${name}"/>
+      <origin xyz="${x} ${y} ${-base_hei/2}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- 前轮宏revolute joint绕Z轴转向 + continuous joint绕Y轴滚动 -->
+  <xacro:macro name="steer_wheel" params="prefix joint_x joint_y">
+    <!-- 转向节 knuckle -->
+    <link name="${prefix}_knuckle">
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/>
+      </inertial>
+    </link>
+    <!--base_link -> knuckle，转向轴绕Z-->
+    <joint name="${prefix}_steer_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_knuckle"/>
+      <origin xyz="${joint_x} ${joint_y} ${-base_hei/2}" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-0.5" upper="0.5" effort="100" velocity="10"/>
+    </joint>
+    <!--前轮link-->
+    <link name="${prefix}_wheel">
+      <visual>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <material name="black"><color rgba="0.1 0.1 0.1 1.0"/></material>
+      </visual>
+      <collision>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <inertial>
+        <origin rpy="1.5708 0 0" xyz="0 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      </inertial>
+    </link>
+    <!--knuckle -> wheel,滚动轴绕Y-->
+    <joint name="${prefix}_wheel_roll_joint" type="continuous">
+      <parent link="${prefix}_knuckle"/>
+      <child link="${prefix}_wheel"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!--四个车轮：前轮带转向节，后轮仅滚动-->
+  <xacro:steer_wheel prefix="front_left_wheel"  joint_x="${base_len/2}"  joint_y="${base_wid/2}"/>
+  <xacro:steer_wheel prefix="front_right_wheel" joint_x="${base_len/2}"  joint_y="${-base_wid/2}"/>
+  <xacro:wheel name="rear_left_wheel"   x="${-base_len/2}" y="${base_wid/2}"/>
+  <xacro:wheel name="rear_right_wheel"  x="${-base_len/2}" y="${-base_wid/2}"/>
+
+  <!--IMU，100Hz，位于底盘中心上方-->
+  <link name="imu_link">
+    <visual>
+      <geometry><box size="0.05 0.05 0.02"/></geometry>
+      <material name="red"><color rgba="1.0 0.0 0.0 1.0"/></material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="imu_link"/>
+    <origin xyz="0 0 ${base_hei/2}" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <topic>imu</topic>
+      <gz_frame_id>imu_link</gz_frame_id>
+    </sensor>
+  </gazebo>
+
+  <!--传感器2: 磁力计，50Hz，偏右0.12m-->
+  <link name="mag_link">
+    <visual>
+      <geometry><box size="0.04 0.04 0.02"/></geometry>
+      <material name="cyan"><color rgba="0.0 0.8 0.8 1.0"/></material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+  <joint name="mag_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="mag_link"/>
+    <origin xyz="0 0.12 ${base_hei/2}" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="mag_link">
+    <sensor name="mag_sensor" type="magnetometer">
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <topic>magnetometer</topic>
+      <gz_frame_id>mag_link</gz_frame_id>
+    </sensor>
+  </gazebo>
+
+  <!--传感器3: GPS，10Hz，偏左0.12m-->
+  <link name="gps_link">
+    <visual>
+      <geometry><box size="0.04 0.04 0.02"/></geometry>
+      <material name="yellow"><color rgba="0.9 0.9 0.0 1.0"/></material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+  <joint name="gps_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="gps_link"/>
+    <origin xyz="0 -0.12 ${base_hei/2}" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="gps_link">
+    <sensor name="gps_sensor" type="navsat">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <topic>navsat</topic>
+      <gz_frame_id>gps_link</gz_frame_id>
+    </sensor>
+  </gazebo>
+
+  <!--传感器4: 里程计，50Hz，发布 /odom 话题和odom->base_link变换-->
+  <gazebo>
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <dimensions>3</dimensions>
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_topic>odom</odom_topic>
+      <odom_publish_frequency>50</odom_publish_frequency>
+    </plugin>
+  </gazebo>
+
+  <!--传感器5: 相机，30Hz，车头正前方-->
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="0.04 0.08 0.04"/></geometry>
+      <material name="green"><color rgba="0.0 0.8 0.0 1.0"/></material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="camera_link"/>
+    <origin xyz="${base_len/2} 0 ${base_hei/2}" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="camera_link">
+    <sensor name="camera_sensor" type="camera">
+      <always_on>true</always_on>
+      <update_rate>30</update_rate>
+      <topic>camera</topic>
+      <gz_frame_id>camera_link</gz_frame_id>
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image><width>640</width><height>480</height></image>
+        <clip><near>0.1</near><far>100</far></clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <!--传感器6: GPU 激光雷达，10Hz，360线，0.12-30m-->
+  <link name="lidar_link">
+    <visual>
+      <geometry><cylinder radius="0.04" length="0.05"/></geometry>
+      <material name="blue2"><color rgba="0.0 0.0 0.8 1.0"/></material>
+    </visual>
+    <inertial>
+      <mass value="0.01"/>
+      <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+    </inertial>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="lidar_link"/>
+    <origin xyz="${base_len/2 + 0.05} 0 -0.08" rpy="0 0 0"/>
+  </joint>
+  <gazebo reference="lidar_link">
+    <sensor name="lidar_sensor" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <topic>scan</topic>
+      <gz_frame_id>lidar_link</gz_frame_id>
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.141592</min_angle>
+            <max_angle>3.141592</max_angle>
+          </horizontal>
+          <vertical>
+            <samples>1</samples>
+            <resolution>1</resolution>
+            <min_angle>0</min_angle>
+            <max_angle>0</max_angle>
+          </vertical>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>30.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <!--Ackermann转向驱动插件-->
+  <gazebo>
+    <plugin filename="gz-sim-ackermann-steering-system"
+            name="gz::sim::systems::AckermannSteering">
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <left_steering_joint>front_left_wheel_steer_joint</left_steering_joint>
+      <right_steering_joint>front_right_wheel_steer_joint</right_steering_joint>
+      <rear_left_wheel_joint>rear_left_wheel_joint</rear_left_wheel_joint>
+      <rear_right_wheel_joint>rear_right_wheel_joint</rear_right_wheel_joint>
+      <wheel_separation>${base_wid}</wheel_separation>
+      <kingpin_width>${base_wid}</kingpin_width>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+      <wheel_base>${base_len}</wheel_base>
+      <max_linear_acceleration>3.0</max_linear_acceleration>
+      <max_angular_acceleration>5.0</max_angular_acceleration>
+      <max_linear_velocity>5.0</max_linear_velocity>
+      <max_angular_velocity>3.0</max_angular_velocity>
+      <max_steering_angle>1.0</max_steering_angle>
+      <topic>/model/racecar/cmd_vel</topic>
+    </plugin>
+  </gazebo>
+
+</robot>

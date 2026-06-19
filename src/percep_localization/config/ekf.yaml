@@ -1,0 +1,56 @@
+# ekf.yaml
+# 这是给 robot_localization 包用的 EKF 配置文件。
+#
+# 注意：本项目默认使用手写的 ekf_fusion_node.py，它更直观、注释更详细，
+#       方便理解 EKF 的每一步。
+#       如果想用 ROS2 官方的 robot_localization，可以用这个配置文件。
+
+ekf_filter_node:
+  ros__parameters:
+    # 频率
+    frequency: 50.0
+
+    # 是否使用仿真时间（Gazebo 里必须 true）
+    use_sim_time: true
+
+    # 传感器 silent_timeout：多久没收到数据就认为传感器失效
+    sensor_timeout: 0.1
+
+    # 输出坐标系
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    # 是否发布 TF
+    publish_tf: true
+
+    # 是否发布加速度
+    publish_acceleration: false
+
+    # ===== odom0: 轮式里程计 =====
+    odom0: /odom
+    odom0_config: [false, false, false,   # x, y, z 位置
+                   false, false, false,   # roll, pitch, yaw 姿态
+                   true,  false, false,   # x_dot, y_dot, z_dot 线速度
+                   false, false, true,    # roll_dot, pitch_dot, yaw_dot 角速度
+                   false, false, false]   # x_acc, y_acc, z_acc 加速度
+    odom0_queue_size: 10
+    odom0_nodelay: true
+    odom0_differential: false
+    odom0_relative: false
+
+    # ===== imu0: 惯性测量单元 =====
+    imu0: /imu
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  false, false, true,    # yaw_dot（横摆角速度）
+                  true,  true,  false]   # x_acc, y_acc（用于估计速度，可选）
+    imu0_queue_size: 10
+    imu0_nodelay: true
+    imu0_differential: false
+    imu0_relative: true
+    imu0_remove_gravitational_acceleration: true
+
+    # 注：robot_localization 对磁力计和 GPS 需要额外配置，
+    #     具体参考官方文档。本项目手写 EKF 已经把它们融合进去了。

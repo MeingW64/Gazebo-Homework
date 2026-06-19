@@ -1,0 +1,44 @@
+# slam_toolbox.yaml
+# 给 slam_toolbox 用的参数配置文件
+# 主要调整 transform_timeout，让 SLAM 对 TF 时间戳更宽容
+
+slam_toolbox:
+  ros__parameters:
+    # 使用仿真时间
+    use_sim_time: true
+
+    # 工作模式：mapping = 建图，localization = 定位
+    mode: mapping
+
+    # 优化求解器配置
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+    ceres_loss_function: None
+
+    # 坐标系配置
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link
+    scan_topic: /scan
+
+    # ===== 关键参数：TF 变换超时 =====
+    # 默认通常 0.1s，仿真里 TF 可能延迟，放宽到 1.0s
+    transform_timeout: 1.0
+
+    # TF buffer 缓存时长
+    tf_buffer_duration: 30.0
+
+    # 雷达最大/最小有效距离
+    # 必须和 racecar_description/urdf/racecar.urdf.xacro 里 lidar 的 range 一致
+    max_laser_range: 10.0
+    min_laser_range: 0.12
+
+    # 建图触发条件：车移动多远或转多少度才更新地图
+    minimum_travel_distance: 0.1
+    minimum_travel_heading: 0.1
+
+    # 扫描匹配参数
+    scan_queue_size: 10

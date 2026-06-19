@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>percep_localization</name>
+  <version>0.1.0</version>
+  <description>感知组位姿估计包：融合传感器数据，估计车辆位姿，建图并输出给规划控制</description>
+  <maintainer email="your_email@example.com">你的名字</maintainer>
+  <license>MIT</license>
+
+  <!-- 构建工具：Python 包用 ament_python -->
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <!-- 运行期依赖 -->
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>visualization_msgs</depend>
+  <depend>fsd_common_msgs</depend>
+  <depend>slam_toolbox</depend>
+  <depend>robot_localization</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
