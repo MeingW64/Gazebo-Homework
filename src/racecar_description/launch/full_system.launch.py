@@ -38,7 +38,7 @@ def generate_launch_description():
 
     use_mpc = PythonExpression(['"', controller, '" == "mpc"'])
 
-    # ---- 1. 仿真环境 ----
+    # 仿真环境
     xacro_file = os.path.join(pkg, 'urdf', 'racecar.urdf.xacro')
     world_file = os.path.join(pkg, 'worlds', 'racecar_world.sdf')
     robot_description = xacro.process_file(xacro_file).toxml()
@@ -100,7 +100,7 @@ def generate_launch_description():
         + os.path.join(pkg, 'tracks', 'meshes')
     )
 
-    # ---- 2. 感知定位 ----
+    #感知定位
     ekf_node = Node(
         package='percep_localization',
         executable='ekf_fusion_node',
@@ -114,7 +114,7 @@ def generate_launch_description():
         }],
     )
 
-    # ---- 3. 仿真锥桶检测 ----
+    #感知代码
     sim_perception_node = Node(
         package='sim_perception',
         executable='sim_node',
@@ -122,7 +122,7 @@ def generate_launch_description():
         output='screen',
     )
 
-    # ---- 4. 锥桶 RViz 可视化 ----
+    # 锥桶RViz可视化
     cone_map_node = Node(
         package='percep_localization',
         executable='cone_map_node',
@@ -141,7 +141,7 @@ def generate_launch_description():
         }],
     )
 
-    # ---- 5. 路径规划 ----
+    #路径规划
     path_planning_node = Node(
         package='path_planning',
         executable='path_planning_node',
@@ -149,7 +149,7 @@ def generate_launch_description():
         output='screen',
     )
 
-    # ---- 6. 控制（二选一） ----
+    #控制
     control_remaps = [
         ('/odometry/filtered', '/percep/vehicle_state'),
         ('/track_points', '/planning/trajectory'),
@@ -196,7 +196,7 @@ def generate_launch_description():
         remappings=control_remaps,
     )
 
-    # ---- 7. RViz 可视化 ----
+    # 规划路径RViz可视化 
     rviz_config = os.path.join(
         get_package_share_directory('racecar_control'), 'config', 'tracking.rviz')
     rviz = Node(

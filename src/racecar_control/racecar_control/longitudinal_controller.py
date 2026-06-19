@@ -21,13 +21,13 @@ class LongitudinalController:
         kd: float = 0.02,
         max_accel: float = 2.0,
     ):
-        self._kp = kp
+        self._kp = kp   #PID参数
         self._ki = ki
         self._kd = kd
-        self._max_accel = max_accel
+        self._max_accel = max_accel #积分上限
 
-        self._integral = 0.0
-        self._prev_speed = 0.0
+        self._integral = 0.0    #初始积分
+        self._prev_speed = 0.0  #上一帧的速度
 
     def compute(
         self,
@@ -52,7 +52,7 @@ class LongitudinalController:
         Returns:
             speed_cmd (m/s)，不低于 min_speed
         """
-        # 弯道安全速度，含曲率死区
+        # 计算弯道安全速度
         abs_curv = abs(curvature)
         deadband = 0.02  # R > 50m 视为直道，不减速
         if abs_curv < deadband:
@@ -60,27 +60,26 @@ class LongitudinalController:
         else:
             v_safe = target_speed / (1.0 + curve_gain * (abs_curv - deadband))
 
-        # PID 加速度
+        # 误差。其实就是加速度
         error = v_safe - current_speed
 
-        # 条件积分：加速度未饱和 或 误差反向时才累加
         accel_unclamped = self._kp * error + self._ki * self._integral
         if (accel_unclamped < self._max_accel and accel_unclamped > -self._max_accel) \
-                or (error * self._integral < 0):
-            self._integral += error * dt
+                or (error * self._integral < 0):   # 判断积分是否饱和，或者误差是不是变号了。
+            self._integral += error * dt    # 此时才继续进行积分
         self._integral = max(-3.0, min(3.0, self._integral))
 
-        # 微分先行：只对测量值求导，避免 v_safe 跳变冲击
+        # 微分先行的思想，只对测量值求微分，避免 v_safe 跳变冲击
         speed_derivative = -(current_speed - self._prev_speed) / dt \
             if dt > 1e-6 else 0.0
         self._prev_speed = current_speed
-
+        #PID本体
         accel = self._kp * error + self._ki * self._integral + self._kd * speed_derivative
 
-        # 加速度限幅
+        # 限制加速度大小
         accel = max(-self._max_accel, min(self._max_accel, accel))
 
-        # 积分速度
+        # 积分速度并限制大小
         speed = current_speed + accel * dt
         speed = max(min_speed, speed)
         return speed

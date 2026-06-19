@@ -30,7 +30,7 @@ class MainControllerNode(Node):
         super().__init__('main_controller_node')
         self._declare_params()#引入参数
         wheelbase = self.get_parameter('wheelbase').value
-        kp = self.get_parameter('speed_kp').value
+        kp = self.get_parameter('speed_kp').value   #PID参数
         ki = self.get_parameter('speed_ki').value
         kd = self.get_parameter('speed_kd').value
         max_accel = self.get_parameter('max_accel').value
@@ -88,7 +88,7 @@ class MainControllerNode(Node):
             self.declare_parameter(name, default)
 
     def _on_path(self, msg: Path):
-        """接收路径点，更新内部缓存。"""
+        #接收路径点，更新内部缓存。
         pts = [(p.pose.position.x, p.pose.position.y) for p in msg.poses]
         if len(pts) >= 2:
             self._path = np.array(pts, dtype=np.float64)
@@ -98,27 +98,27 @@ class MainControllerNode(Node):
             self.get_logger().warn('路径点数不足 (<2)，忽略')
 
     def _on_odom(self, msg: Odometry):
-        """接收里程计，更新车辆状态缓存。"""
+        #接收里程计，更新车辆状态缓存。
         self._odom = msg
 
     def _control_loop(self):
-        """主控制循环，50Hz 定时触发。"""
+        #主控制循环，50Hz 定时触发。
         now = time.monotonic()
         dt = now - self._last_time
         self._last_time = now
-        dt = max(0.01, min(0.05, dt))  # 钳位，防止卡顿导致跳变
+        dt = max(0.01, min(0.05, dt))  # dt钳位，防止卡顿导致跳变
 
-        if self._path is None or self._odom is None:
+        if self._path is None or self._odom is None: #如果没有规划的路径了，或者里程计了，就退出控制循环
             return
 
         # 提取车辆状态
         px = self._odom.pose.pose.position.x  #车的全局坐标
         py = self._odom.pose.pose.position.y
         q = self._odom.pose.pose.orientation
-        yaw = self._yaw_from_quaternion(q.x, q.y, q.z, q.w)
-        vx = self._odom.twist.twist.linear.x
+        yaw = self._yaw_from_quaternion(q.x, q.y, q.z, q.w) #计算车的航向角
+        vx = self._odom.twist.twist.linear.x    #车的x,y线速度
         vy = self._odom.twist.twist.linear.y
-        current_speed = math.hypot(vx, vy)
+        current_speed = math.hypot(vx, vy)  #计算车当前的速度
 
         # 读取全部参数
         target_speed = self.get_parameter('target_speed').value
@@ -166,7 +166,7 @@ class MainControllerNode(Node):
             p1 = self._path[i1]
             p2 = self._path[i2]
             area2 = abs((p1[0] - p0[0]) * (p2[1] - p0[1]) -
-                        (p1[1] - p0[1]) * (p2[0] - p0[0]))
+                        (p1[1] - p0[1]) * (p2[0] - p0[0]))  #计算面积
             a = math.hypot(p1[0] - p0[0], p1[1] - p0[1])
             b = math.hypot(p2[0] - p1[0], p2[1] - p1[1])
             c_ = math.hypot(p0[0] - p2[0], p0[1] - p2[1])
@@ -176,31 +176,30 @@ class MainControllerNode(Node):
         else:
             self._curvature = 0.0
 
-        # 纵向控制
+        # 纵向控制的速度
         speed_cmd = self._longitudinal.compute(
             target_speed, current_speed, self._curvature, dt,
             min_speed=min_speed, curve_gain=curve_gain,
         )
 
-        # 路径过时保护：超过 2 秒未收到新路径则停车
+        # 超过 2 秒未收到新路径则停车
         if hasattr(self, '_path_stamp'):
             path_age = (self.get_clock().now() - self._path_stamp).nanoseconds / 1e9
             if path_age > 2.0:
                 speed_cmd = 0.0
 
-        # 终点检测：三层距离防线
-        if len(self._path) >= 2:
-            last_pt = self._path[-1]
+        if len(self._path) >= 2:    
+            last_pt = self._path[-1]    
             dist_to_end = math.hypot(px - last_pt[0], py - last_pt[1])
 
-            if dist_to_end < 3.0:
+            if dist_to_end < 3.0:   #到终点的距离<3时，强制减速
                 max_speed_near_end = target_speed * (dist_to_end / 3.0)
                 if speed_cmd > max_speed_near_end:
                     speed_cmd = max_speed_near_end
-            if dist_to_end < 0.5:
+            if dist_to_end < 0.5: #到终点的距离<0.5时，强制停车
                 speed_cmd = 0.0
 
-            # 投影越线法兜底
+            # 小车在路径末尾切线上的投影超过终点，那就停车
             prev_pt = self._path[-2]
             path_dir = np.array([last_pt[0] - prev_pt[0], last_pt[1] - prev_pt[1]])
             path_len = np.linalg.norm(path_dir)
@@ -214,11 +213,11 @@ class MainControllerNode(Node):
         if abs(steering_angle) > 1e-6:
             angular_z = speed_cmd * math.tan(steering_angle) / self._lateral.wheelbase
         else:
-            angular_z = 0.0
+            angular_z = 0.0   #转向角太小默认为0
 
         twist = Twist()
-        twist.linear.x = speed_cmd
-        twist.angular.z = angular_z
+        twist.linear.x = speed_cmd #纵向速度
+        twist.angular.z = angular_z #横向速度
         self._cmd_pub.publish(twist)
 
         # 低频日志

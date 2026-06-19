@@ -52,7 +52,7 @@ class LateralController:
         返回:
             steering_angle: 转向角(rad),>0就左转
         """
-        if len(path_xy) < 2:    #如果现在规划出来的路径点小于2个，就判断不在转向
+        if len(path_xy) < 2:    #如果现在规划出来的路径点小于2个，就判断不再转向
             return 0.0
 
         # 当前的速度越大，选用的前瞻距离就约大，防止冲出去。
@@ -66,16 +66,16 @@ class LateralController:
         # 将点的从全局坐标系转到车辆局部坐标系
         dx = goal[0] - vehicle_x
         dy = goal[1] - vehicle_y
-        local_x =  dx * math.cos(vehicle_yaw) + dy * math.sin(vehicle_yaw)
+        local_x =  dx * math.cos(vehicle_yaw) + dy * math.sin(vehicle_yaw)#相当于乘一个旋转矩阵
         local_y = -dx * math.sin(vehicle_yaw) + dy * math.cos(vehicle_yaw)
 
-        # 曲率（使用实际距离而非期望 ld，防止弯道内外切）
-        goal_dist2 = local_x * local_x + local_y * local_y
-        if goal_dist2 < 1e-6:
+        # 使用实际距离而非期望ld来计算曲率，防止弯道内外切
+        goal_dist2 = local_x * local_x + local_y * local_y 
+        if goal_dist2 < 1e-6:   #此时说明已经到目标点了
             return 0.0
-        curvature = 2.0 * local_y / goal_dist2
+        curvature = 2.0 * local_y / goal_dist2 #计算曲率
 
-        # Ackermann 几何：曲率转转向角zh 
+        # 纯跟踪算法转向角公式。用曲率代替1/R
         steering = math.atan(curvature * self._wheelbase)
 
         # 限幅
@@ -98,8 +98,8 @@ class LateralController:
 
         # 在上次最近点附近的窗口内查找
         if hasattr(LateralController, '_prev_nearest_idx'):
-            prev = LateralController._prev_nearest_idx
-            search_start = max(0, prev - 5)
+            prev = LateralController._prev_nearest_idx  
+            search_start = max(0, prev - 5) 
             search_end = min(len(path_xy), prev + 30)
             local_dists = dists[search_start:search_end]
             start_idx = search_start + int(np.argmin(local_dists))
@@ -107,10 +107,10 @@ class LateralController:
             start_idx = int(np.argmin(dists))
         LateralController._prev_nearest_idx = start_idx
 
-        cos_yaw = math.cos(vyaw)
+        cos_yaw = math.cos(vyaw)    
         sin_yaw = math.sin(vyaw)
 
-        best_point = None
+        best_point = None   
         best_diff = float('inf')
         best_forward = None
         best_forward_dist = -1.0

@@ -1,4 +1,4 @@
-"""仅启动 Gazebo 仿真环境的启动文件，不含感知、规划、控制。"""
+#仅启动 Gazebo 仿真环境的启动文件，不含感知、规划、控制
 
 import os
 from launch import LaunchDescription
