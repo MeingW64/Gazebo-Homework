@@ -78,9 +78,6 @@ class LateralController:
         # Ackermann 几何：曲率转转向角zh 
         steering = math.atan(curvature * self._wheelbase)
 
-        # 整体缩放
-        steering *= steering_scale
-
         # 限幅
         steering = max(-max_steering_angle, min(max_steering_angle, steering))
         return steering
@@ -99,7 +96,7 @@ class LateralController:
         """
         dists = np.hypot(path_xy[:, 0] - vx, path_xy[:, 1] - vy)
 
-        # 局部连续搜索：在上次最近点附近的窗口内查找
+        # 在上次最近点附近的窗口内查找
         if hasattr(LateralController, '_prev_nearest_idx'):
             prev = LateralController._prev_nearest_idx
             search_start = max(0, prev - 5)

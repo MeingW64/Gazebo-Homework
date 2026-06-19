@@ -33,7 +33,7 @@ import xacro
 def generate_launch_description():
     pkg = get_package_share_directory('racecar_description')
 
-    controller = LaunchConfiguration('controller', default='pure_pursuit')
+    controller = LaunchConfiguration('controller', default='main_controller')
     target_speed = LaunchConfiguration('target_speed', default='2.0')
 
     use_mpc = PythonExpression(['"', controller, '" == "mpc"'])
@@ -157,8 +157,8 @@ def generate_launch_description():
 
     control_pp = Node(
         package='racecar_control',
-        executable='pure_pursuit_node',
-        name='pure_pursuit_node',
+        executable='main_controller_node',
+        name='main_controller_node',
         output='screen',
         condition=IfCondition(PythonExpression(['not ', use_mpc])),
         parameters=[{
@@ -209,8 +209,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument(
-            'controller', default_value='pure_pursuit',
-            description='控制算法: pure_pursuit 或 mpc'),
+            'controller', default_value='main_controller',
+            description='控制算法: main_controller 或 mpc'),
         DeclareLaunchArgument(
             'target_speed', default_value='2.0',
             description='目标速度 (m/s)'),

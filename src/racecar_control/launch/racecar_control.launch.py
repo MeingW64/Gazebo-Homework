@@ -24,8 +24,8 @@ def generate_launch_description():
 
     control_node = Node(
         package='racecar_control',
-        executable='pure_pursuit_node',
-        name='pure_pursuit_node',
+        executable='main_controller_node',
+        name='main_controller_node',
         output='screen',
         parameters=[{
             'lookahead_distance': LaunchConfiguration('lookahead_distance'),

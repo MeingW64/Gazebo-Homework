@@ -25,9 +25,9 @@ from .lateral_controller import LateralController
 from .longitudinal_controller import LongitudinalController
 
 
-class PurePursuitNode(Node):
+class MainControllerNode(Node):
     def __init__(self):
-        super().__init__('pure_pursuit_node')
+        super().__init__('main_controller_node')
         self._declare_params()#引入参数
         wheelbase = self.get_parameter('wheelbase').value
         kp = self.get_parameter('speed_kp').value
@@ -62,7 +62,7 @@ class PurePursuitNode(Node):
         self._timer = self.create_timer(1.0 / freq, self._control_loop)
         self._last_time = time.monotonic()
 
-        self.get_logger().info('Pure Pursuit 控制节点已启动 | 横向=PurePursuit | 纵向=PID')
+        self.get_logger().info('主控制节点已启动 | 横向=PurePursuit | 纵向=PID')
 
     def _declare_params(self):
         defaults = {
@@ -242,7 +242,7 @@ class PurePursuitNode(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = PurePursuitNode()
+    node = MainControllerNode()
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

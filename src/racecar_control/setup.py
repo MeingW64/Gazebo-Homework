@@ -21,7 +21,7 @@ setup(
     license='MIT',
     entry_points={
         'console_scripts': [
-            'pure_pursuit_node = racecar_control.pure_pursuit_node:main',
+            'main_controller_node = racecar_control.main_controller_node:main',
         ],
     },
 )
